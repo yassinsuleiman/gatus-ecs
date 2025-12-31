@@ -1,0 +1,11 @@
+aws_region      = "eu-central-1"
+az_count        = 2
+my_vpc_cidr     = "10.10.0.0/16"
+app_port        = 8080
+project_name    = "gatus"
+health_check_path = "/"
+fargate_cpu     = 1024
+fargate_memory  = 2048
+domain_name     = "yassinsuleiman.com"
+validation_method = "DNS"
+subdomain = "yassinsuleiman.com"
