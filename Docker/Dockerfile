@@ -21,6 +21,6 @@ COPY --from=builder /app/gatus-build /app/gatus-build
 COPY --from=builder /app/config/config.yaml /app/config/
 #Expose Web Port
 EXPOSE 8080
-#Run Buildd
+#Run Builddd
 CMD ["/app/gatus-build"]
 
