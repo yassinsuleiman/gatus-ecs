@@ -32,7 +32,7 @@ jobs:
 
     - name: Build Docker image
       run: |
-        docker build -f Docker/Dockerfile -t "$ECR_REGISTRY/$ECR_REPOSITORY:${{ github.sha }}" /app
+        docker build -f Docker/Dockerfile -t "$ECR_REGISTRY/$ECR_REPOSITORY:${{ github.sha }}" app
       env:
         ECR_REGISTRY: ${{ steps.ecr-login.outputs.registry }}
         ECR_REPOSITORY: gatus-app
