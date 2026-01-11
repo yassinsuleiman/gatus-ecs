@@ -37,6 +37,15 @@ jobs:
         ECR_REGISTRY: ${{ steps.ecr-login.outputs.registry }}
         ECR_REPOSITORY: gatus-app
 
+    - name: Run Trivy scanner on Image
+      uses: aquasecurity/trivy-action@0.33.1
+      with:
+        image-ref: "${{ steps.ecr-login.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}"
+        format: table
+        severity: CRITICAL,HIGH
+        ignore-unfixed: true
+        exit-code: 1
+
     - name: Push Docker image to ECR
       run: |
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:${{ github.sha }}
