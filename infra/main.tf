@@ -43,8 +43,10 @@ module "acm" {
   project_name = var.project_name
   validation_method = var.validation_method
   domain_name = var.domain_name
-  hosted_zone = var.hosted_zone
-  cert_domain = var.cert_domain
+  subdomain = var.subdomain
+  zone_id = module.Route53.zone_id
+ 
+  
 }
 
 module "Route53" {
@@ -52,6 +54,7 @@ module "Route53" {
   domain_name = var.domain_name
   alb_dns = module.alb.alb_hostname
   alb_zone = module.alb.alb_zone_id
-  subdomain = var.subdomain
+  subdomain = var.subdomain 
+  
 
 }

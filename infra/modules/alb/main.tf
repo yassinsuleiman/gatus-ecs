@@ -40,16 +40,19 @@ resource "aws_alb_listener" "http" {
     }
   }
 
-}
-resource "aws_alb_listener" "https" {
-  load_balancer_arn = aws_alb.main.arn
-  port = 443
-  protocol          = "HTTPS"
-  certificate_arn = var.certificate_arn
-
-  default_action {
-    target_group_arn = aws_alb_target_group.app_tg.arn
-    type             = "forward"
-  }
 
 }
+
+
+# resource "aws_alb_listener" "https" {
+#   load_balancer_arn = aws_alb.main.arn
+#   port = 443
+#   protocol          = "HTTPS"
+#   certificate_arn = var.certificate_arn
+
+#   default_action {
+#     target_group_arn = aws_alb_target_group.app_tg.arn
+#     type             = "forward"
+#   }
+
+# }

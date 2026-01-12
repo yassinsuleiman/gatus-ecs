@@ -47,13 +47,9 @@ description = "Domain name for the App"
 variable "validation_method" {
 }  
 
-variable "hosted_zone" {
-  
-}
 
-variable "cert_domain" {
-  
-}
+
+
 variable "subdomain" {
   
 }

@@ -9,9 +9,10 @@ variable "project_name" {
   
 }
 
-variable "hosted_zone" {
+variable "subdomain" {
   
 }
-variable "cert_domain" {
+
+variable "zone_id" {
   
 }
