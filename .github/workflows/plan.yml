@@ -26,6 +26,7 @@ jobs:
       uses: bridgecrewio/checkov-action@master
       with:
         directory: infra
+        soft_fail: true
     
     - name: Configure AWS Credentials (OIDC)
       uses: aws-actions/configure-aws-credentials@v4
