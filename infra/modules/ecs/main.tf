@@ -1,5 +1,9 @@
 resource "aws_ecs_cluster" "main" {
  name = "${var.project_name}-cluster"
+
+ setting {
+    name  = "containerInsights"
+    value = "enabled"
 }
 
 # Pull Region for Task Definition
@@ -26,6 +30,7 @@ resource "aws_ecs_task_definition" "gatus_app" {
       "environment": [],
       "environmentFiles": [],
       "essential": true,
+      "readonlyRootFilesystem": true
       "image": "784607970889.dkr.ecr.eu-central-1.amazonaws.com/gatus-app@sha256:8d88dce86bb1c086d1ddeb14231b8aa97231c78bfab69669362d79467456727c",
       "logConfiguration": {
         "logDriver": "awslogs",
@@ -63,6 +68,7 @@ resource "aws_ecs_service" "main" {
     task_definition = aws_ecs_task_definition.gatus_app.arn
     desired_count   = var.app_count
     launch_type     = "FARGATE"
+    assign_public_ip = false
 
     network_configuration {
         security_groups  = [var.ecs_sg]
