@@ -6,6 +6,7 @@ on:
     paths:
       - "Docker/Dockerfile"
       - ".github/workflows/build.yml"
+  workflow_dispatch:
 
 permissions: #(required for OIDC
   id-token: write 
@@ -30,12 +31,13 @@ jobs:
       id: ecr-login
       uses: aws-actions/amazon-ecr-login@v2
 
-    - name: Login to Docker Hardened Images (dhi.io)
-      uses: docker/login-action@v3
-      with:
-        registry: dhi.io
-        username: ${{ secrets.DHI_USERNAME }}
-        password: ${{ secrets.DHI_TOKEN }}
+    # If using Docker Hardened Images use this step
+    # - name: Login to Docker Hardened Images (dhi.io)
+    #   uses: docker/login-action@v3
+    #   with:
+    #     registry: dhi.io
+    #     username: ${{ secrets.DHI_USERNAME }}
+    #     password: ${{ secrets.DHI_TOKEN }}
 
     - name: Build Docker image
       run: |

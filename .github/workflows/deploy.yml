@@ -5,7 +5,7 @@ name: Terraform Deploy
     branches: [ main ]
     paths:
       - "infra/**"
-
+  workflow_dispatch:
 permissions:
   id-token: write
   contents: read
