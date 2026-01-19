@@ -44,16 +44,26 @@ jobs:
       - name: terraform plan
         uses: dflook/terraform-plan@v2
         with:
-          path: infra
-
-      - name: Terraform Unlock
-        uses: dflook/terraform-unlock-state@v2
-        continue-on-error: true
-        with:
-           path: infra
-           lock_id: ${{ secrets.LOCK_ID }}      
+          path: infra   
 
       - name: terraform apply
+        id: first-try
+        uses: dflook/terraform-apply@v2
+        with:
+          path: infra
+          auto_approve: true
+
+      - name: Unlock state if locked
+        if: ${{ steps.first-try.outputs.failure-reason == 'state-locked' }}
+        uses: dflook/terraform-unlock-state@v2
+        with:
+         path: infra
+         lock_id: ${{ fromJSON(steps.first-try.outputs.lock-info).ID }}
+
+
+      - name: Retry terraform apply
+        id: second-try 
+        if: ${{ steps.first-try.outputs.failure-reason == 'state-locked' }}
         uses: dflook/terraform-apply@v2
         with:
           path: infra

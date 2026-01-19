@@ -37,12 +37,25 @@ jobs:
           path: infra
           lock_id: ${{ secrets.LOCK_ID }}  
 
-      - name: terraform destroy
-        uses: dflook/terraform-destroy@v2
-        id: first_try
-        continue-on-error: true
+
+      - name: terraform destroy target
+        id: plan
+        uses: dflook/terraform-plan@v2
         with:
           path: infra
-       
+          target: |
+            module.vpc
+            module.alb
+            module.ecs
+            module.acm
+            module.Route53
+
+      - name: Apply destory plan
+        uses: dflook/terraform-apply@v2
+        continue-on-error: true
+        with:
+           path: infra 
+           plan_file: ${{ steps.plan.outputs.plan_path }}
+
 
     
