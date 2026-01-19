@@ -22,49 +22,40 @@ resource "aws_ecs_task_definition" "gatus_app" {
 
   runtime_platform {
     operating_system_family = "LINUX"
-    cpu_architecture        = "ARM64"
+    cpu_architecture        = "X86_64"
   }
   container_definitions = jsonencode([
-    #Container Defintion - Acquired from Clickops
     {
-      "cpu" : 0,
-      "environment" : [],
-      "environmentFiles" : [],
-      "essential" : true,
-      "readonlyRootFilesystem" : true
-      "image" : "784607970889.dkr.ecr.eu-central-1.amazonaws.com/gatus-app@sha256:8d88dce86bb1c086d1ddeb14231b8aa97231c78bfab69669362d79467456727c",
-      "logConfiguration" : {
-        "logDriver" : "awslogs",
-        "options" : {
-          "awslogs-group" : "/ecs/gatus-task-definition",
-          "awslogs-create-group" : "true",
-          "awslogs-region" : data.aws_region.current.region,
-          "awslogs-stream-prefix" : "ecs"
-        },
-        "secretOptions" : []
-      },
-      "mountPoints" : [],
-      "name" : "gatus-app",
-      "portMappings" : [
-        {
-          "appProtocol" : "http",
-          "containerPort" : 8080,
-          "hostPort" : 8080,
-          "name" : "gatus-app-8080-tcp",
-          "protocol" : "tcp"
-        }
-      ],
-      "systemControls" : [],
-      "ulimits" : [],
-      "volumesFrom" : []
-    }
+      name      = "gatus-app"
+      image     = var.app_image
+      essential = true
 
+      portMappings = [
+        {
+          containerPort = var.app_port
+          hostPort      = var.app_port
+          protocol      = "tcp"
+        }
+      ]
+
+      logConfiguration = {
+        logDriver = "awslogs"
+        options = {
+          awslogs-group         = "/ecs/gatus-task-definition"
+          awslogs-create-group  = "true"
+          awslogs-region        = data.aws_region.current.region
+          awslogs-stream-prefix = "ecs"
+        }
+      }
+    }
   ])
-  tags = { Name = "${var.project_name}-task-definition" }
+
+  tags = { Name = "${var.project_name}-app-task" }
 }
 
+
 resource "aws_ecs_service" "main" {
-  name            = "cb-service"
+  name            = "${var.project_name}-service"
   cluster         = aws_ecs_cluster.main.id
   task_definition = aws_ecs_task_definition.gatus_app.arn
   desired_count   = var.app_count

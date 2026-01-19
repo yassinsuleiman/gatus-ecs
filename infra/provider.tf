@@ -5,7 +5,6 @@ terraform {
       version = "~> 6.0"
     }
   }
-
 }
 
 # Configure the AWS region

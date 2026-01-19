@@ -2,29 +2,33 @@
 
 variable "aws_region" {
   description = "The AWS region things are created in"
+  type        = string
 }
 
 variable "ec2_task_execution_role_name" {
   description = "ECS task execution role name"
   default     = "myEcsTaskExecutionRole"
+
 }
 
 
 variable "region_count" {
   description = "Number of AZs to cover in a given region"
 
+
 }
 
+
 variable "app_image" {
-  description = "Docker image to run in the ECS cluster"
-  default     = "bradfordhamilton/crystal_blockchain:latest"
+  description = "docker image used to run the application"
+  type        = string
+
 }
 
 
 
 variable "app_count" {
   description = "Number of docker containers to run"
-  default     = 3
 }
 
 variable "health_check_path" {
@@ -37,7 +41,7 @@ variable "fargate_cpu" {
 }
 
 variable "fargate_memory" {
-  description = "Fargate instance memory to provision (in MiB)"
+  description = "Fargate instance memory to provision in MiB)"
   default     = "2048"
 }
 
@@ -55,10 +59,9 @@ variable "ecs_sg" {
 
 }
 variable "alb_tg" {
+  description = "target group of load balancer"
 
 }
-
-
 
 variable "project_name" {
 

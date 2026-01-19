@@ -25,19 +25,10 @@ variable "project_name" {
 
 
 variable "health_check_path" {
+  description = "Health check path of the application"
 
 }
 
-variable "fargate_cpu" {
-  description = "Fargate instance CPU units to provision (1 vCPU = 1024 CPU units)"
-
-}
-
-
-variable "fargate_memory" {
-  description = "Fargate instance memory to provision (in MiB)"
-
-}
 
 variable "domain_name" {
   description = "Domain name for the App"
@@ -48,8 +39,16 @@ variable "validation_method" {
 }
 
 
-
-
 variable "subdomain" {
+
+}
+
+variable "app_count" {
+  description = "Count of Tasks to run"
+
+}
+
+variable "app_image" {
+  description = "URL of Image in ECR Repository"
 
 }

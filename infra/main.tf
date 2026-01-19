@@ -13,10 +13,10 @@ module "alb" {
   public_subnets    = module.vpc.public_subnet_ids
   alb_sg            = module.vpc.alb_sg_id
   vpc_id            = module.vpc.vpc_id
-  health_check_path = var.health_check_path
   certificate_arn   = module.acm.certificate_arn
+  health_check_path = var.health_check_path
 
-# depends_on = [module.acm]
+  # depends_on = [module.acm]
 
 
 
@@ -26,43 +26,58 @@ module "alb" {
 module "ecs" {
   source            = "./modules/ecs"
   ecs_subnets       = module.vpc.private_subnet_ids
-  aws_region        = var.aws_region
-  app_port          = var.app_port
   ecs_sg            = module.vpc.ecs-task-sg
   alb_tg            = module.alb.target_group_arn
+  aws_region        = var.aws_region
+  app_port          = var.app_port
   region_count      = var.az_count
   project_name      = var.project_name
   health_check_path = var.health_check_path
-  fargate_cpu       = var.fargate_cpu
-  fargate_memory    = var.fargate_memory
+  app_count         = var.app_count
+  app_image         = var.app_image
+
+
 
   # depends_on = [module.alb]
-
 }
 
 
 module "acm" {
   source            = "./modules/acm"
+  zone_id           = module.Route53.zone_id
   project_name      = var.project_name
   validation_method = var.validation_method
   domain_name       = var.domain_name
   subdomain         = var.subdomain
-  zone_id           = module.Route53.zone_id
 
-#  depends_on = [module.Route53]
+
+  #  depends_on = [module.Route53]
 
 }
 
 module "Route53" {
   source      = "./modules/Route53"
-  domain_name = var.domain_name
   alb_dns     = module.alb.alb_hostname
   alb_zone    = module.alb.alb_zone_id
   subdomain   = var.subdomain
+  domain_name = var.domain_name
 
-  
+
+
+
+}
+
+module "ecr" {
+  source       = "./modules/ecr"
+  project_name = var.project_name
 
 
 }
 
 
+
+
+
+# What we wanna docker
+# 1. have it do terrafom desroy everything but the ecr
+# 2. 

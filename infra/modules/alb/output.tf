@@ -28,5 +28,5 @@ output "listener_http" {
 
 output "alb_zone_id" {
   value       = aws_alb.main.zone_id
-  description = "Canonical hosted zone id for the ALB (used in Route53 alias records)"
+  description = " hosted zone id for the ALB (used in Route53 alias records)"
 }
