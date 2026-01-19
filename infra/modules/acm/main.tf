@@ -9,6 +9,10 @@ resource "aws_acm_certificate" "cert" {
   tags = {
     Name = "${var.project_name}-certificate"
   }
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 
@@ -28,11 +32,19 @@ resource "aws_route53_record" "cert_validation" {
   type            = each.value.type
   zone_id         = var.zone_id
 
+  lifecycle {
+    create_before_destroy = true
+  }
+
 }
 
 resource "aws_acm_certificate_validation" "main" {
   certificate_arn         = aws_acm_certificate.cert.arn
   validation_record_fqdns = [for record in aws_route53_record.cert_validation : record.fqdn]
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 

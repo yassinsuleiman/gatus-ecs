@@ -39,6 +39,9 @@ resource "aws_alb_listener" "http" {
       status_code = "HTTP_301"
     }
   }
+  lifecycle {
+    create_before_destroy = true
+  }
 
 
 }
@@ -53,6 +56,10 @@ resource "aws_alb_listener" "https" {
   default_action {
     target_group_arn = aws_alb_target_group.app_tg.arn
     type             = "forward"
+  }
+
+  lifecycle {
+    create_before_destroy = true
   }
 
 }
