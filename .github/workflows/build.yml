@@ -30,7 +30,6 @@ jobs:
     - name: Log in to AWS ECR
       id: ecr-login
       uses: aws-actions/amazon-ecr-login@v2
-      
 
     # If using Docker Hardened Images use this step
     # - name: Login to Docker Hardened Images (dhi.io)
@@ -42,7 +41,7 @@ jobs:
 
     - name: Build Docker image
       run: |
-         docker buildx build --platform linux/amd64,linux/arm64 -f Docker/Dockerfile -t "$ECR_REGISTRY/$ECR_REPOSITORY:${{ github.sha }}" app
+        docker build -f Docker/Dockerfile -t "$ECR_REGISTRY/$ECR_REPOSITORY:${{ github.sha }}" app
       env:
         ECR_REGISTRY: ${{ steps.ecr-login.outputs.registry }}
         ECR_REPOSITORY: gatus-repo
@@ -61,6 +60,5 @@ jobs:
       run: |
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:${{ github.sha }}
       env:
-
         ECR_REGISTRY: ${{ steps.ecr-login.outputs.registry }}
         ECR_REPOSITORY: gatus-repo
