@@ -1,0 +1,24 @@
+# terraform.tfvars.example
+# Copy to terraform.tfvars and fill in your own values.
+
+aws_region        = "eu-central-1"
+az_count          = 2
+
+# ECS
+app_count         = 2
+app_port          = 8080
+app_image         = "<AWS_ACCOUNT_ID>.dkr.ecr.<AWS_REGION>.amazonaws.com/<ECR_REPO_NAME>:<IMAGE_TAG_OR_SHA>"
+
+# Networking
+my_vpc_cidr       = "10.10.0.0/16"
+
+# Health checks
+health_check_path = "/health"
+
+# ACM / Route53
+validation_method = "DNS" # "DNS" is recommended for ACM validation
+domain_name       = "example.com"
+subdomain         = "tm"
+
+# Resulting URL example:
+# https://tm.example.com
