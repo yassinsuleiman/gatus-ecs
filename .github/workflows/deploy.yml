@@ -84,13 +84,8 @@ jobs:
           max-attempts: 20
           retry-delay: 15s
 
-      - name: Success message
+      - name: Deployment summary
         run: |
-          {
-            echo "## Deployment Status"
-            echo ""
-            echo "✅ Website successfully running: https://${{ secrets.DOMAIN_NAME }}"
-            echo ""
-            echo "🔎 Health check: https://${{ secrets.DOMAIN_NAME }}/health"
-          } >> "$GITHUB_STEP_SUMMARY"
-           
+            echo "## Deployment Status" >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "Website successfully running: https://${{ secrets.DOMAIN_NAME }}" >> "$GITHUB_STEP_SUMMARY"
