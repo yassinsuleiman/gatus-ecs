@@ -1,4 +1,0 @@
-.terraform/*
-.terraform.lock.hcl
-.terraform/providers/registry.terraform.io/hashicorp/aws/6.25.0/darwin_arm64/LICENSE.txt
-.terraform/providers/registry.terraform.io/hashicorp/aws/6.25.0/darwin_arm64/terraform-provider-aws_v6.25.0_x5

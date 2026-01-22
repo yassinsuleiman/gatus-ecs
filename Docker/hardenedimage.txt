@@ -1,3 +1,0 @@
-If wanting to use a Docker Hardened Image, use this one
-
-FROM dhi.io/golang:.25.6-alpine3.23-sfw-ent-dev@sha256:sha256:16a8a08a4c64cca6670cb8fcb3f4c3b5a78bb395f46f09f73f06411678033113 as builder

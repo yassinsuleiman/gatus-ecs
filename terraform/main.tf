@@ -73,11 +73,3 @@ module "ecr" {
 
 
 }
-
-
-
-
-
-# What we wanna docker
-# 1. have it do terrafom desroy everything but the ecr
-# 2. 

@@ -10,6 +10,8 @@ RUN go mod download
 COPY . .
 # Build: Slimmed down and defined
 RUN CGO_ENABLED=0 GOOS=linux go build -o /app/gatus-build
+#Clean up
+RUN go mod tidy
 
 
 

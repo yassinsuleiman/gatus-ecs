@@ -18,7 +18,7 @@ This project deploys Gatus as a **production-style, cloud-hosted application** o
 
 ## Architecture Diagram
 
-![AWS Architecture Diagram](Images/architecture.png)
+![AWS Architecture Diagram](Images/dia1.png)
 
 *Architecture diagram showing the complete AWS infrastructure setup for the Gatus application deployment on ECS Fargate.*
 
@@ -122,3 +122,4 @@ The infrastructure follows security best practices:
 - Security groups use least privilege access
 - All traffic is encrypted with HTTPS/TLS
 - GitHub Actions uses OIDC authentication instead of long-lived credentials
+
