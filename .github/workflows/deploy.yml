@@ -4,7 +4,7 @@ name: Terraform Deploy
   push:
     branches: [ main ]
     paths:
-      - "Terraform/**"
+      - "terraform/**"
   workflow_dispatch:
 permissions:
   id-token: write
