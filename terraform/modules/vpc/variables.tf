@@ -5,7 +5,7 @@ variable "az_count" {
 
 }
 variable "my_vpc_cidr" {
-
+  description = "CIDR block of your VPC"
   type = string
 
 }

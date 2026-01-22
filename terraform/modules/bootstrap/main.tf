@@ -10,7 +10,7 @@ terraform {
 }
 
 variable "aws_region" {
- description = "AWS Region that Infra will be built in"
+ description = "AWS Region in which your Infrastructure will be deployed in"
  type = string
 }
 

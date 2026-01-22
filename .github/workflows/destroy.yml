@@ -22,7 +22,7 @@ jobs:
         id: checkov
         uses: bridgecrewio/checkov-action@master
         with:
-          directory: ${{ vars.INFRA_PATH }}
+          directory: terraform
           soft_fail: true
 
       - name: Configure AWS Credentials (OIDC)
@@ -36,7 +36,7 @@ jobs:
         continue-on-error: true
         uses: dflook/terraform-plan@v2
         with:
-          path: ${{ vars.INFRA_PATH }}
+          path: terraform
           destroy: true
           target: |
             module.vpc
@@ -48,7 +48,7 @@ jobs:
         if: ${{ steps.plan_first.outputs.failure-reason == 'state-locked' }}
         uses: dflook/terraform-unlock-state@v2
         with:
-          path: ${{ vars.INFRA_PATH }}
+          path: terraform
           lock_id: ${{ fromJSON(steps.plan_first.outputs.lock-info).ID }}
 
       - name: terraform plan (destroy, targeted) - retry
@@ -56,7 +56,7 @@ jobs:
         if: ${{ steps.plan_first.outputs['failure-reason'] == 'state-locked' }}
         uses: dflook/terraform-plan@v2
         with:
-          path: ${{ vars.INFRA_PATH }}
+          path: terraform
           destroy: true
           target: |
             module.vpc
@@ -70,7 +70,7 @@ jobs:
         continue-on-error: true
         uses: dflook/terraform-apply@v2
         with:
-          path: ${{ vars.INFRA_PATH }}
+          path: terraform
           plan_path: ${{ steps.plan_first.outcome == 'success' && steps.plan_first.outputs.plan_path || steps.plan_retry.outputs.plan_path }}
           auto_approve: true
 
@@ -78,13 +78,13 @@ jobs:
         if: ${{ steps.apply_first.outputs['failure-reason'] == 'state-locked' }}
         uses: dflook/terraform-unlock-state@v2
         with:
-          path: ${{ vars.INFRA_PATH }}
+          path: terraform
           lock_id: ${{ fromJSON(steps.apply_first.outputs['lock-info']).ID }}
 
       - name: terraform apply (retry)
         if: ${{ steps.apply_first.outputs['failure-reason'] == 'state-locked' }}
         uses: dflook/terraform-apply@v2
         with:
-          path: ${{ vars.INFRA_PATH }}
+          path: terraform
           plan_path: ${{ steps.plan_first.outcome == 'success' && steps.plan_first.outputs.plan_path || steps.plan_retry.outputs.plan_path }}
           auto_approve: true

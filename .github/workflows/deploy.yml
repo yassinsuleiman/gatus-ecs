@@ -21,7 +21,7 @@ jobs:
         id: checkov
         uses: bridgecrewio/checkov-action@master
         with:
-          directory: ${{ vars.INFRA_PATH }}
+          directory: terraform
           soft_fail: true
 
       - name: Configure AWS Credentials (OIDC)
@@ -34,24 +34,24 @@ jobs:
         uses: dflook/terraform-validate@v2
         id: validate
         with:
-          path: ${{ vars.INFRA_PATH }}
+          path: terraform
 
       - name: terraform fmt
         uses: dflook/terraform-fmt@v2
         with:
-          path: ${{ vars.INFRA_PATH }}
+          path: terraform
 
       - name: terraform plan
         uses: dflook/terraform-plan@v2
         with:
-          path: ${{ vars.INFRA_PATH }}   
+          path: terraform   
 
       - name: terraform apply
         id: first-try
         uses: dflook/terraform-apply@v2
         continue-on-error: true
         with:
-          path: ${{ vars.INFRA_PATH }}
+          path: terraform
           auto_approve: true
          
 
@@ -59,7 +59,7 @@ jobs:
         if: ${{ steps.first-try.outputs.failure-reason == 'state-locked' }}
         uses: dflook/terraform-unlock-state@v2
         with:
-         path: ${{ vars.INFRA_PATH }}
+         path: terraform
          lock_id: ${{ fromJSON(steps.first-try.outputs.lock-info).ID }}
 
 
@@ -68,7 +68,7 @@ jobs:
         if: ${{ steps.first-try.outputs.failure-reason == 'state-locked' }}
         uses: dflook/terraform-apply@v2
         with:
-          path: ${{ vars.INFRA_PATH }}
+          path: terraform
           auto_approve: true
 
   health-check:

@@ -7,6 +7,16 @@ resource "aws_ecs_cluster" "main" {
   }
 }
 
+resource "aws_cloudwatch_log_group" "gatus" {
+  name              = "/ecs/gatus-task-definition"
+  retention_in_days = 14
+
+  tags = {
+    Name    = "gatus-logs"
+    Project = "gatus"
+  }
+}
+
 # Pull Region for Task Definition
 data "aws_region" "current" {}
 
@@ -74,8 +84,6 @@ resource "aws_ecs_service" "main" {
     container_port   = var.app_port
 
   }
-
-  depends_on = [aws_iam_role_policy_attachment.ecs-task-execution-role-policy-attachment]
 
   tags = { Name = "${var.project_name}-ecs-service" }
 }

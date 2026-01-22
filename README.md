@@ -10,7 +10,7 @@ This project deploys Gatus as a **production-style, cloud-hosted application** o
 - **Secure access**: **HTTPS** via **ACM** + **ALB** with a custom domain (Route 53)
 - **Private compute**: Tasks run in **private subnets** (no public IPs)
 - **Automated delivery**: GitHub Actions workflows for build → scan → plan → apply
-- **Security checks**: Container scanning (**Trivy**) + IaC scanning (**Checkov/TfSec**)
+- **Security checks**: Container scanning (**Trivy**) + IaC scanning (**Checkov**)
 
 ---
 
@@ -36,8 +36,13 @@ Gatus is a great “real-world” demo app because it naturally exercises produc
 
 ---
 
+## Demo of the Application
+![alt text](Images/gatus_ui.gif)
 
-## Deployment Status
+*The Gatus web application running in production with HTTPS encryption on the custom domain https://tm.yassinsuleiman.com, deployed on AWS ECS Fargate.*
+
+
+## Deployment
 
 ![Terraform Deploy Pipeline](Images/deploy_workflow_success.png)
 
@@ -47,12 +52,12 @@ This repo uses separate GitHub Actions workflows:
 - **Terraform Deploy (CD):** Runs **Checkov** (IaC scan), then Terraform `fmt/validate/plan/apply`, followed by a `/health` check.
 - **Terraform Destroy:** Manual teardown workflow to destroy infrastructure (includes state-lock unlock + retry).
 
+## How to Deploy
+
+**Documentation:** **[Deployment Guide](how_to_deploy.md)** (bootstrap, CI/CD, tfvars, and teardown)
+
 ---
 
-## Demo of the Application
-![alt text](Images/gatus_ui.gif)
-
-*The Gatus web application running in production with HTTPS encryption on the custom domain https://tm.yassinsuleiman.com, deployed on AWS ECS Fargate.*
 
 ## Local Setup
 
