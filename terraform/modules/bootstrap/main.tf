@@ -88,7 +88,7 @@ lifecycle {
 }
 
 
-# Output values needed for backend and ecr configuration
+# Output values needed for backend and ECR configuration
 output "repo_url" {
   value = aws_ecr_repository.gatus.repository_url
 }

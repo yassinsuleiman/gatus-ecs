@@ -17,3 +17,4 @@ variable "subdomain" {
 variable "zone_id" {
 
 }
+
