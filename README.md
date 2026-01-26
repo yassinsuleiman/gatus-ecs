@@ -22,6 +22,13 @@ This project deploys Gatus as a **production-style, cloud-hosted application** o
 
 *Architecture diagram showing the complete AWS infrastructure setup for the Gatus application deployment on ECS Fargate.*
 
+## Key Metrics
+
+- ~**6.8 min** automated Terraform deploy (incl. Checkov + `/health` verification)
+- **3.5 GB → 75 MB (~98%)** image size reduction via Docker multi-stage builds
+- **Trivy + Checkov** security scanning in CI/CD
+- **OIDC → AWS IAM role** (no stored AWS keys)
+
 
 ## What is Gatus?
 
