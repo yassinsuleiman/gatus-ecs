@@ -10,7 +10,7 @@ on:
 permissions:
   id-token: write
   contents: read
-
+l
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -44,27 +44,6 @@ jobs:
             module.ecs
             module.acm
 
-      - name: Unlock state if locked (during plan)
-        if: ${{ steps.plan_first.outputs.failure-reason == 'state-locked' }}
-        uses: dflook/terraform-unlock-state@v2
-        with:
-          path: terraform
-          lock_id: ${{ fromJSON(steps.plan_first.outputs.lock-info).ID }}
-
-      - name: terraform plan (destroy, targeted) - retry
-        id: plan_retry
-        if: ${{ steps.plan_first.outputs['failure-reason'] == 'state-locked' }}
-        uses: dflook/terraform-plan@v2
-        with:
-          path: terraform
-          destroy: true
-          target: |
-            module.vpc
-            module.alb
-            module.ecs
-            module.acm
-            module.Route53
-
       - name: terraform apply (destroy plan) - first try
         id: apply_first
         continue-on-error: true
@@ -74,17 +53,3 @@ jobs:
           plan_path: ${{ steps.plan_first.outcome == 'success' && steps.plan_first.outputs.plan_path || steps.plan_retry.outputs.plan_path }}
           auto_approve: true
 
-      - name: Unlock state if locked (during apply)
-        if: ${{ steps.apply_first.outputs['failure-reason'] == 'state-locked' }}
-        uses: dflook/terraform-unlock-state@v2
-        with:
-          path: terraform
-          lock_id: ${{ fromJSON(steps.apply_first.outputs['lock-info']).ID }}
-
-      - name: terraform apply (retry)
-        if: ${{ steps.apply_first.outputs['failure-reason'] == 'state-locked' }}
-        uses: dflook/terraform-apply@v2
-        with:
-          path: terraform
-          plan_path: ${{ steps.plan_first.outcome == 'success' && steps.plan_first.outputs.plan_path || steps.plan_retry.outputs.plan_path }}
-          auto_approve: true

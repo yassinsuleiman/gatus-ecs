@@ -1,0 +1,29 @@
+{
+  "family": "gatus_app_task",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "256",
+  "memory": "512",
+  "executionRoleArn": "REPLACE_EXECUTION_ROLE_ARN",
+  "containerDefinitions": [
+    {
+      "name": "gatus-app",
+      "image": "REPLACE_IMAGE",
+      "essential": true,
+      "portMappings": [
+        {
+          "containerPort": 8080,
+          "protocol": "tcp"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/gatus-task-definition",
+          "awslogs-region": "REPLACE_REGION",
+          "awslogs-stream-prefix": "ecs"
+        }
+      }
+    }
+  ]
+}

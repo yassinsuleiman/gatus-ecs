@@ -4,8 +4,6 @@ module "vpc" {
   my_vpc_cidr  = var.my_vpc_cidr
   app_port     = var.app_port
   project_name = var.project_name
-
-
 }
 
 module "alb" {
@@ -15,12 +13,6 @@ module "alb" {
   vpc_id            = module.vpc.vpc_id
   certificate_arn   = module.acm.certificate_arn
   health_check_path = var.health_check_path
-
-  # depends_on = [module.acm]
-
-
-
-
 }
 
 module "ecs" {
@@ -35,12 +27,7 @@ module "ecs" {
   health_check_path = var.health_check_path
   app_count         = var.app_count
   app_image         = var.app_image
-
-
-
-  # depends_on = [module.alb]
 }
-
 
 module "acm" {
   source            = "./modules/acm"
@@ -49,10 +36,6 @@ module "acm" {
   validation_method = var.validation_method
   domain_name       = var.domain_name
   subdomain         = var.subdomain
-
-
-  #  depends_on = [module.Route53]
-
 }
 
 module "Route53" {
@@ -61,10 +44,6 @@ module "Route53" {
   alb_zone    = module.alb.alb_zone_id
   subdomain   = var.subdomain
   domain_name = var.domain_name
-
-
-
-
 }
 
 

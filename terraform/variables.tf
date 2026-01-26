@@ -26,7 +26,7 @@ variable "project_name" {
 
 variable "health_check_path" {
   description = "Health check path of the application"
-  default = "/health"
+  default     = "/health"
 }
 
 

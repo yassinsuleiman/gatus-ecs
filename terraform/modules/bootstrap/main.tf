@@ -1,5 +1,5 @@
 terraform {
-  required_version = ">= 1.10"  # Required for S3 native locking
+  required_version = ">= 1.10" # Required for S3 native locking
 
   required_providers {
     aws = {
@@ -10,8 +10,8 @@ terraform {
 }
 
 variable "aws_region" {
- description = "AWS Region in which your Infrastructure will be deployed in"
- type = string
+  description = "AWS Region in which your Infrastructure will be deployed in"
+  type        = string
 }
 
 
@@ -78,7 +78,7 @@ resource "aws_ecr_repository" "gatus" {
   encryption_configuration {
     encryption_type = "AES256"
   }
-lifecycle {
+  lifecycle {
     prevent_destroy = true
   }
 

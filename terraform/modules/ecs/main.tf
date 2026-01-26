@@ -11,10 +11,7 @@ resource "aws_cloudwatch_log_group" "gatus" {
   name              = "/ecs/gatus-task-definition"
   retention_in_days = 14
 
-  tags = {
-    Name    = "gatus-logs"
-    Project = "gatus"
-  }
+  tags = { Name = "${var.project_name}-logs" }
 }
 
 # Pull Region for Task Definition
@@ -37,7 +34,7 @@ resource "aws_ecs_task_definition" "gatus_app" {
   container_definitions = jsonencode([
     {
       name      = "gatus-app"
-      image     = var.app_image
+      image     = "REPLACED_BY_CICD"
       essential = true
 
       portMappings = [
@@ -51,8 +48,8 @@ resource "aws_ecs_task_definition" "gatus_app" {
       logConfiguration = {
         logDriver = "awslogs"
         options = {
-          awslogs-group         = "/ecs/gatus-task-definition"
-          awslogs-create-group  = "true"
+          awslogs-group         = aws_cloudwatch_log_group.gatus.name
+          awslogs-create-group  = "false"
           awslogs-region        = data.aws_region.current.region
           awslogs-stream-prefix = "ecs"
         }
@@ -70,7 +67,10 @@ resource "aws_ecs_service" "main" {
   task_definition = aws_ecs_task_definition.gatus_app.arn
   desired_count   = var.app_count
   launch_type     = "FARGATE"
-
+  
+ lifecycle {
+    ignore_changes = [task_definition]
+  }
 
   network_configuration {
     security_groups  = [var.ecs_sg]

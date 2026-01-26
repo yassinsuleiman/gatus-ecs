@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
     paths:
-      - "Docker/Dockerfile"
+      - "/app"
   workflow_dispatch:
 
 permissions: #(required for OIDC
