@@ -4,16 +4,16 @@ on:
   push:
     branches: [main]
     paths:
-      - "/app"
+      - "Docker/Dockerfile"
   workflow_dispatch:
 
 permissions: #(required for OIDC
-  id-token: write 
-  contents: read 
-  
+  id-token: write
+  contents: read
+
 jobs:
   build:
-    name: Build and push to ECR
+    name: Build push and deploy to ECS
     runs-on: ubuntu-latest
 
     steps:
@@ -53,3 +53,21 @@ jobs:
       env:
         ECR_REGISTRY: ${{ steps.ecr-login.outputs.registry }}
         ECR_REPOSITORY: gatus-repo
+
+    # --- ADDED: Render task definition with new image ---
+    - name: Render Amazon ECS task definition
+      id: render-task-def
+      uses: aws-actions/amazon-ecs-render-task-definition@v1
+      with:
+        task-definition: ecs/task-definition.json   # <-- change to your JSON path
+        container-name: gatus-app                   # <-- must match container_name in your service
+        image: "${{ steps.ecr-login.outputs.registry }}/gatus-repo:${{ github.sha }}"
+
+    # --- ADDED: Deploy new task definition to ECS service ---
+    - name: Deploy to Amazon ECS service
+      uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+      with:
+        task-definition: ${{ steps.render-task-def.outputs.task-definition }}
+        cluster: gatus-cluster                      # <-- change
+        service: gatus-service                      # <-- change
+        wait-for-service-stability: true
