@@ -10,7 +10,7 @@ on:
 permissions:
   id-token: write
   contents: read
-l
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -22,7 +22,7 @@ jobs:
         id: checkov
         uses: bridgecrewio/checkov-action@master
         with:
-          directory: terraform
+          directory: ${{ vars.INFRA_PATH }}
           soft_fail: true
 
       - name: Configure AWS Credentials (OIDC)
@@ -31,12 +31,12 @@ jobs:
           role-to-assume: ${{ secrets.AWS_OIDC_ARN }}
           aws-region: ${{ vars.AWS_REGION }}
 
-      - name: terraform plan (destroy, targeted) - first try
+      - name: terraform plan
         id: plan_first
         continue-on-error: true
         uses: dflook/terraform-plan@v2
         with:
-          path: terraform
+          path: ${{ vars.INFRA_PATH }}
           destroy: true
           target: |
             module.vpc
@@ -44,12 +44,12 @@ jobs:
             module.ecs
             module.acm
 
-      - name: terraform apply (destroy plan) - first try
+     
+      - name: terraform apply (destroy plan)
         id: apply_first
         continue-on-error: true
         uses: dflook/terraform-apply@v2
         with:
-          path: terraform
+          path: ${{ vars.INFRA_PATH }}
           plan_path: ${{ steps.plan_first.outcome == 'success' && steps.plan_first.outputs.plan_path || steps.plan_retry.outputs.plan_path }}
           auto_approve: true
-

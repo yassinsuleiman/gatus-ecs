@@ -1,71 +1,75 @@
-name: Build and Push Docker Image to AWS ECR
+name: Terraform Deploy
 
-on:
+"on":
   push:
-    branches: [main]
+    branches: [ main ]
     paths:
-      - "Docker/Dockerfile"
+      - "terraform/**"
   workflow_dispatch:
-
 permissions:
   id-token: write
   contents: read
 
 jobs:
   build:
-    name: Build push and deploy to ECS
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Configure AWS Credentials (OIDC)
-      uses: aws-actions/configure-aws-credentials@v4
-      with:
-        role-to-assume: ${{ secrets.AWS_OIDC_ARN }}
-        aws-region: ${{ vars.AWS_REGION }}
+      - name: Run Checkov action
+        id: checkov
+        uses: bridgecrewio/checkov-action@master
+        with:
+          directory: terraform
+          soft_fail: true
 
-    - name: Log in to AWS ECR
-      id: ecr-login
-      uses: aws-actions/amazon-ecr-login@v2
+      - name: Configure AWS Credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_OIDC_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
 
-    - name: Build Docker image
-      run: |
-        docker build -f Docker/Dockerfile -t "$ECR_REGISTRY/$ECR_REPOSITORY:${{ github.sha }}" app
-      env:
-        ECR_REGISTRY: ${{ steps.ecr-login.outputs.registry }}
-        ECR_REPOSITORY: gatus-repo
+      - name: terraform validate
+        uses: dflook/terraform-validate@v2
+        id: validate
+        with:
+          path: terraform
 
-    - name: Run Trivy scanner on Image
-      uses: aquasecurity/trivy-action@0.33.1
-      with:
-        image-ref: "${{ steps.ecr-login.outputs.registry }}/gatus-repo:${{ github.sha }}"
-        format: table
-        severity: CRITICAL,HIGH
-        scanners: vuln
-        ignore-unfixed: true
-        exit-code: 1
+      - name: terraform fmt
+        uses: dflook/terraform-fmt@v2
+        with:
+          path: terraform
 
-    - name: Push Docker image to ECR
-      run: |
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:${{ github.sha }}
-      env:
-        ECR_REGISTRY: ${{ steps.ecr-login.outputs.registry }}
-        ECR_REPOSITORY: gatus-repo
+      - name: terraform plan
+        uses: dflook/terraform-plan@v2
+        with:
+          path: terraform   
 
-    - name: Render Amazon ECS task definition
-      id: render-task-def
-      uses: aws-actions/amazon-ecs-render-task-definition@v1
-      with:
-        task-definition: ecs/task-definition.json  
-        container-name: gatus-app                  
-        image: "${{ steps.ecr-login.outputs.registry }}/gatus-repo:${{ github.sha }}"
+      - name: terraform apply
+        id: first-try
+        uses: dflook/terraform-apply@v2
+        continue-on-error: true
+        with:
+          path: terraform
+          auto_approve: true
 
-    - name: Deploy to Amazon ECS service
-      uses: aws-actions/amazon-ecs-deploy-task-definition@v2
-      with:
-        task-definition: ${{ steps.render-task-def.outputs.task-definition }}
-        cluster: gatus-cluster                      
-        service: gatus-service                      
-        wait-for-service-stability: true
+
+  health-check:
+    name: Post-Deploy Health Check
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Health check
+        uses: jtalk/url-health-check-action@v4
+        with:
+          url: https://${{ vars.DOMAIN_NAME }}.com/health
+          follow-redirect: true
+          max-attempts: 20
+          retry-delay: 15s
+
+      - name: Deployment summary
+        run: |
+            echo "## Deployment Status" >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "Website successfully running: https://${{ vars.DOMAIN_NAME }}.com" >> "$GITHUB_STEP_SUMMARY"
