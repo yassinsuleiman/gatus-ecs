@@ -9,6 +9,11 @@ terraform {
   }
 }
 
+variable "project_name" {
+  type = string
+  default = "gatus"
+  
+}
 variable "aws_region" {
   description = "AWS Region in which your Infrastructure will be deployed in"
   type        = string
@@ -69,8 +74,8 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "state" {
 }
 
 # ECR Boostrap
-resource "aws_ecr_repository" "gatus" {
-  name                 = "gatus-repo"
+resource "aws_ecr_repository" "main" {
+  name                 = "${var.project_name}-repo"
   image_tag_mutability = "MUTABLE"
   image_scanning_configuration {
     scan_on_push = true

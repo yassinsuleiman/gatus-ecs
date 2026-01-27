@@ -33,7 +33,7 @@ resource "aws_ecs_task_definition" "main" {
   }
   container_definitions = jsonencode([
     {
-      name      = "${var.project_name}-app"
+      name      = "${var.project_name}-container"
       image     = var.app_image #Boostrap only, is gonna get overwritten by CICD
       essential = true
 
