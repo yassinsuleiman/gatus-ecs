@@ -18,7 +18,7 @@ This project deploys Gatus as a **production-style, cloud-hosted application** o
 
 ## Architecture Diagram
 
-![AWS Architecture Diagram](images/dia1.png)
+![AWS Architecture Diagram](Images/dia1.png)
 
 *Architecture diagram showing the complete AWS infrastructure setup for the Gatus application deployment on ECS Fargate.*
 
