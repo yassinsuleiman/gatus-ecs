@@ -4,17 +4,16 @@ on:
   pull_request:
     branches: [main]
     paths:
-      - "infra/**"
-      - ".github/workflows/terraform-plan.yml"
+      - "terraform/**"
+      - ".github/workflows/plan.yml"
   workflow_dispatch:
 
 permissions:
   id-token: write
   contents: read
-  pull-requests: write   # needed so dflook can comment on PRs
+  pull-requests: write
 
 env:
-  INFRA_PATH: infra
   AWS_REGION: ${{ vars.AWS_REGION }}
 
 jobs:
@@ -36,11 +35,19 @@ jobs:
         with:
           path: terraform
 
-      - name: Export plan as txt
+      - name: Render plan to text (dflook)
+        id: tfshow
+        uses: dflook/terraform-show@v2
+        with:
+          path: terraform
+          plan: ${{ steps.tfplan.outputs.plan_path }}
+
+      - name: Save plan to file
         if: always()
         run: |
-          cd "terraform"
-          terraform show -no-color "${{ steps.tfplan.outputs.plan_path }}" > tfplan.txt
+          cat << 'EOF' > terraform/tfplan.txt
+          ${{ steps.tfshow.outputs.text }}
+          EOF
 
       - name: Upload plan txt artifact
         if: always()
@@ -55,5 +62,4 @@ jobs:
         run: |
           echo "## Terraform plan" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "- Plan file: \`${{ steps.tfplan.outputs.plan_path }}\`" >> $GITHUB_STEP_SUMMARY
           echo "- Download: the **terraform-plan** artifact (tfplan.txt)" >> $GITHUB_STEP_SUMMARY
