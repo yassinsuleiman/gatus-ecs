@@ -79,7 +79,7 @@ resource "aws_ecr_repository" "gatus" {
     encryption_type = "AES256"
   }
   lifecycle {
-    prevent_destroy = true
+    prevent_destroy = false
   }
 
 

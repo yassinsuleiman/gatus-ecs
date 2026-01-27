@@ -4,7 +4,7 @@
   "requiresCompatibilities": ["FARGATE"],
   "cpu": "256",
   "memory": "512",
-  "executionRoleArn": "REPLACE_EXECUTION_ROLE_ARN",
+  "executionRoleArn": "arn:aws:iam::784607970889:role/ecstaskexecutionrole_gatus",
   "containerDefinitions": [
     {
       "name": "gatus-app",
@@ -20,7 +20,6 @@
         "logDriver": "awslogs",
         "options": {
           "awslogs-group": "/ecs/gatus-task-definition",
-          "awslogs-region": "REPLACE_REGION",
           "awslogs-stream-prefix": "ecs"
         }
       }

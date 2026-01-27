@@ -5,8 +5,8 @@ resource "aws_ecs_cluster" "main" {
     name  = "containerInsights"
     value = "enabled"
   }
-}
 
+}
 resource "aws_cloudwatch_log_group" "gatus" {
   name              = "/ecs/gatus-task-definition"
   retention_in_days = 14
@@ -67,8 +67,8 @@ resource "aws_ecs_service" "main" {
   desired_count   = var.app_count
   launch_type     = "FARGATE"
   
-  deployment_minimum_healthy_percent = 50
-  deployment_maximum_percent         = 20
+  deployment_minimum_healthy_percent = 100
+  deployment_maximum_percent         = 200
  lifecycle {
     ignore_changes = [task_definition]
   }
