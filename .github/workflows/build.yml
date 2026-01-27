@@ -11,6 +11,15 @@ permissions:
   id-token: write
   contents: read
 
+env:
+  PROJECT_NAME: ${{ vars.PROJECT_NAME }}
+  AWS_REGION: ${{ vars.AWS_REGION }}
+  ECR_REPOSITORY: ${{ vars.ECR_REPOSITORY }}
+
+  ECS_CLUSTER_NAME: ${{ vars.PROJECT_NAME }}-cluster
+  ECS_SERVICE_NAME: ${{ vars.PROJECT_NAME }}-service
+  ECS_CONTAINER_NAME: gatus-app
+
 jobs:
   build:
     name: Build push and deploy to ECS
@@ -24,7 +33,7 @@ jobs:
       uses: aws-actions/configure-aws-credentials@v4
       with:
         role-to-assume: ${{ secrets.AWS_OIDC_ARN }}
-        aws-region: ${{ vars.AWS_REGION }}
+        aws-region: ${{ env.AWS_REGION }}
 
     - name: Log in to AWS ECR
       id: ecr-login
@@ -35,12 +44,12 @@ jobs:
         docker build -f Docker/Dockerfile -t "$ECR_REGISTRY/$ECR_REPOSITORY:${{ github.sha }}" app
       env:
         ECR_REGISTRY: ${{ steps.ecr-login.outputs.registry }}
-        ECR_REPOSITORY: gatus-repo
+        ECR_REPOSITORY: ${{ env.ECR_REPOSITORY }}
 
     - name: Run Trivy scanner on Image
       uses: aquasecurity/trivy-action@0.33.1
       with:
-        image-ref: "${{ steps.ecr-login.outputs.registry }}/gatus-repo:${{ github.sha }}"
+        image-ref: "${{ steps.ecr-login.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}"
         format: table
         severity: CRITICAL,HIGH
         scanners: vuln
@@ -52,20 +61,20 @@ jobs:
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:${{ github.sha }}
       env:
         ECR_REGISTRY: ${{ steps.ecr-login.outputs.registry }}
-        ECR_REPOSITORY: gatus-repo
+        ECR_REPOSITORY: ${{ env.ECR_REPOSITORY }}
 
     - name: Render Amazon ECS task definition
       id: render-task-def
       uses: aws-actions/amazon-ecs-render-task-definition@v1
       with:
-        task-definition: ecs/task_definition.json   
-        container-name: gatus-app                   
-        image: "${{ steps.ecr-login.outputs.registry }}/gatus-repo:${{ github.sha }}"
+        task-definition: ecs/task_definition.json
+        container-name: ${{ env.ECS_CONTAINER_NAME }}
+        image: "${{ steps.ecr-login.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}"
 
     - name: Deploy to Amazon ECS service
       uses: aws-actions/amazon-ecs-deploy-task-definition@v2
       with:
         task-definition: ${{ steps.render-task-def.outputs.task-definition }}
-        cluster: gatus-cluster                     
-        service: gatus-service                     
+        cluster: ${{ env.ECS_CLUSTER_NAME }}
+        service: ${{ env.ECS_SERVICE_NAME }}
         wait-for-service-stability: true
