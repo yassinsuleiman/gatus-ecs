@@ -1,9 +1,6 @@
 name: Terraform Plan
 
 on:
-  pull_request:
-    paths:
-      - "infra/**"
   workflow_dispatch:
 
 permissions:
@@ -11,13 +8,12 @@ permissions:
   contents: read
 
 env:
-  INFRA_PATH: terraform
+  TF_PATH: terrraform
   AWS_REGION: ${{ vars.AWS_REGION }}
 
 jobs:
   plan:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -28,34 +24,41 @@ jobs:
           role-to-assume: ${{ secrets.AWS_OIDC_ARN }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
+      - name: terraform validate
+        uses: dflook/terraform-validate@v2
         with:
-          terraform_version: 1.6.6
+          path: ${{ env.TF_PATH }}
 
-      - name: Terraform Init
-        working-directory: ${{ env.INFRA_PATH }}
-        run: terraform init -input=false
+      - name: terraform fmt
+        uses: dflook/terraform-fmt@v2
+        with:
+          path: ${{ env.TF_PATH }}
 
-      - name: Terraform Format Check
-        working-directory: ${{ env.INFRA_PATH }}
-        run: terraform fmt -check -recursive
+      - name: terraform plan
+        id: plan
+        uses: dflook/terraform-plan@v2
+        with:
+          path: ${{ env.TF_PATH }}
 
-      - name: Terraform Validate
-        working-directory: ${{ env.INFRA_PATH }}
-        run: terraform validate
-
-      - name: Terraform Plan
-        working-directory: ${{ env.INFRA_PATH }}
-        run: terraform plan -input=false -out=tfplan
-
-      - name: Terraform Show (human-readable)
-        working-directory: ${{ env.INFRA_PATH }}
-        run: terraform show -no-color tfplan
-
-      - name: Upload tfplan artifact
+      - name: Upload plan artifacts
         uses: actions/upload-artifact@v4
         with:
           name: tfplan
-          path: ${{ env.INFRA_PATH }}/tfplan
+          path: |
+            ${{ steps.plan.outputs.plan_path }}
+            ${{ steps.plan.outputs.text_plan_path }}
+            ${{ steps.plan.outputs.json_plan_path }}
           if-no-files-found: error
+
+      - name: Write plan to GitHub Summary
+        shell: bash
+        run: |
+          echo "## Terraform Plan" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Path: \`${{ env.TF_PATH }}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "### Plan Output" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          cat "${{ steps.plan.outputs.text_plan_path }}" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
