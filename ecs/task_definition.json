@@ -16,7 +16,7 @@
       "logConfiguration": {
         "logDriver": "awslogs",
         "options": {
-          "awslogs-group": "/ecs/gatus-task-definition",
+          "awslogs-group": "/gatus/logs",
           "awslogs-region": "eu-west-2",
           "awslogs-stream-prefix": "ecs"
         }
