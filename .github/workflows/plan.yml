@@ -28,7 +28,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_OIDC_ARN }}
-          aws-region: ${{ vars.AWS_REGION }}
+          aws-region: ${{ env.AWS_REGION }}
 
       - name: Terraform Plan (dflook)
         id: tfplan
@@ -36,3 +36,24 @@ jobs:
         with:
           path: terraform
 
+      - name: Export plan as txt
+        if: always()
+        run: |
+          cd "terraform"
+          terraform show -no-color "${{ steps.tfplan.outputs.plan_path }}" > tfplan.txt
+
+      - name: Upload plan txt artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: terraform-plan
+          path: terraform/tfplan.txt
+          retention-days: 7
+
+      - name: Add link to Job Summary
+        if: always()
+        run: |
+          echo "## Terraform plan" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- Plan file: \`${{ steps.tfplan.outputs.plan_path }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- Download: the **terraform-plan** artifact (tfplan.txt)" >> $GITHUB_STEP_SUMMARY
