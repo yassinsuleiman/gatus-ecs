@@ -1,5 +1,5 @@
 {
-  "family": "gatus_app_task",
+  "family": "gatus_task",
   "networkMode": "awsvpc",
   "requiresCompatibilities": ["FARGATE"],
   "cpu": "256",
@@ -7,7 +7,7 @@
   "executionRoleArn": "arn:aws:iam::784607970889:role/ecstaskexecutionrole_gatus",
   "containerDefinitions": [
     {
-      "name": "gatus-app",
+      "name": "gatus-container",
       "image": "REPLACE_IMAGE",
       "essential": true,
       "portMappings": [
