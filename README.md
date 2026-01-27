@@ -9,7 +9,7 @@ This project deploys Gatus as a **production-style, cloud-hosted application** o
 - **High availability**: Deployed across **multiple Availability Zones**
 - **Secure access**: **HTTPS** via **ACM** + **ALB** with a custom domain (Route 53)
 - **Private compute**: Tasks run in **private subnets** (no public IPs)
-- **Automated delivery**: GitHub Actions workflows for build → scan → plan → apply
+- **Automated delivery**:  GitHub Actions for build → scan → push → deploy (and Terraform plan/apply/destroy)
 - **Security checks**: Container scanning (**Trivy**) + IaC scanning (**Checkov**)
 
 ---
@@ -18,7 +18,7 @@ This project deploys Gatus as a **production-style, cloud-hosted application** o
 
 ## Architecture Diagram
 
-![AWS Architecture Diagram](Images/dia1.png)
+![AWS Architecture Diagram](images/dia1.png)
 
 *Architecture diagram showing the complete AWS infrastructure setup for the Gatus application deployment on ECS Fargate.*
 
@@ -55,9 +55,10 @@ Gatus is a great “real-world” demo app because it naturally exercises produc
 
 This repo uses separate GitHub Actions workflows:
 
-- **Build & Push (CI):** Builds the Docker image, runs a **Trivy** vulnerability scan, then pushes to **AWS ECR**.
-- **Terraform Deploy (CD):** Runs **Checkov** (IaC scan), then Terraform `fmt/validate/plan/apply`, followed by a `/health` check.
-- **Terraform Destroy:** Manual teardown workflow to destroy infrastructure (includes state-lock unlock + retry).
+- **Build + Push + Deploy (CI):** Builds the Docker image, runs a Trivy vulnerability scan, pushes to AWS ECR, then renders a new ECS task definition with the new image tag and deploys it to ECS (rolling update, waits for service stability).
+- **Terraform Plan (CD):** Runs Checkov (IaC scan) and creates a Terraform plan artifact you can download and review before applying.
+- **Terraform Deploy (CD):** Runs Checkov (IaC scan), then Terraform fmt/validate/plan/apply, followed by a `/health` check.
+- **Terraform Destroy:** Manual teardown workflow to destroy infrastructure.
 
 ## How to Deploy
 
@@ -92,7 +93,7 @@ The Gatus UI will be available at http://localhost:8080.
 ECS-Project/
 ├── .github/
 │   └── workflows/
-│       ├── build.yml        # Docker build + scan (Trivy) + push to ECR
+│       ├── build.yml        # Build + scan (Trivy) + push to ECR + deploy to ECS (render task-def, rolling update)
 │       ├── deploy.yml       # Terraform fmt/validate/plan/apply + health check
 │       └── destroy.yml      # Manual teardown (terraform destroy)
 │
