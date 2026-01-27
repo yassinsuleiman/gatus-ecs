@@ -14,11 +14,13 @@ permissions:
   pull-requests: write
 
 env:
+  TF_DIR: terraform
   AWS_REGION: ${{ vars.AWS_REGION }}
 
 jobs:
   plan:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -29,37 +31,60 @@ jobs:
           role-to-assume: ${{ secrets.AWS_OIDC_ARN }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Terraform Plan (dflook)
-        id: tfplan
-        uses: dflook/terraform-plan@v2
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@v3
         with:
-          path: terraform
+          terraform_version: 1.6.6
 
-      - name: Render plan to text (dflook)
-        id: tfshow
-        uses: dflook/terraform-show@v2
-        with:
-          path: terraform
-          plan: ${{ steps.tfplan.outputs.plan_path }}
+      - name: Terraform Init
+        working-directory: ${{ env.TF_DIR }}
+        run: terraform init -input=false
 
-      - name: Save plan to file
-        if: always()
-        run: |
-          cat << 'EOF' > terraform/tfplan.txt
-          ${{ steps.tfshow.outputs.text }}
-          EOF
+      - name: Terraform Validate
+        working-directory: ${{ env.TF_DIR }}
+        run: terraform validate
+
+      - name: Terraform Plan (binary)
+        working-directory: ${{ env.TF_DIR }}
+        run: terraform plan -input=false -no-color -out=tfplan.bin
+
+      - name: Export plan as text
+        working-directory: ${{ env.TF_DIR }}
+        run: terraform show -no-color tfplan.bin > tfplan.txt
 
       - name: Upload plan txt artifact
-        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: terraform-plan
-          path: terraform/tfplan.txt
+          path: ${{ env.TF_DIR }}/tfplan.txt
           retention-days: 7
 
-      - name: Add link to Job Summary
+      - name: Add plan preview to Job Summary
         if: always()
+        working-directory: ${{ env.TF_DIR }}
         run: |
           echo "## Terraform plan" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "- Download: the **terraform-plan** artifact (tfplan.txt)" >> $GITHUB_STEP_SUMMARY
+          echo "Artifact: **terraform-plan** (tfplan.txt)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Preview (first 200 lines)" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          head -n 200 tfplan.txt >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+      - name: Comment on PR (short)
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const body = [
+              "Terraform plan is ready.",
+              "",
+              "Check the workflow run summary for a preview and download the artifact **terraform-plan** to open `tfplan.txt`."
+            ].join("\n");
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body
+            });
