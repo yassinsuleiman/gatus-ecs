@@ -54,6 +54,7 @@ resource "aws_eip" "gw" {
 resource "aws_nat_gateway" "main" {
  connectivity_type = "public"
  availability_mode = "regional"
+ vpc_id = aws_vpc.main_vpc.id 
 
 
   tags = { Name = "${var.project_name}-nat" }
